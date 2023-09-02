@@ -13,8 +13,7 @@ def getRadius(area):
 def getContours(image):
 
     blur = cv2.medianBlur(image, 5)
-    gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)
-    thresh = cv2.threshold(gray,180,255, cv2.THRESH_BINARY)[1]
+    thresh = cv2.threshold(blur, 180, 255, cv2.THRESH_BINARY)[1]
 
     cnts = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnts = cnts[0] if len(cnts) == 2 else cnts[1]
