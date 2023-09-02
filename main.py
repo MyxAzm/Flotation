@@ -1,7 +1,15 @@
 import cv2
 import numpy as np
+import math
 
+# высчитывает радиус
+def getRadius(area):
 
+    radius = round(math.sqrt(area / math.pi))
+
+    return radius
+
+# выдает контуры
 def getContours(image):
 
     blur = cv2.medianBlur(image, 5)
@@ -13,6 +21,7 @@ def getContours(image):
 
     return cnts
 
+# находит окружности
 def detectBubbles(image):
 
     min_area = 0.1
@@ -20,32 +29,27 @@ def detectBubbles(image):
     for c in cnts:
         area = cv2.contourArea(c)
         if area > min_area:
-            cv2.drawContours(image, [c], -1, (36, 255, 12), 1)
+            moment = cv2.moments(c)
+            if moment['m00'] != 0:
+               cx = int(moment['m10']/moment['m00'])
+               cy = int(moment['m01']/moment['m00'])
+               cv2.circle(image, (cx, cy), getRadius(area), (0, 0, 255), -1)
 
-    cv2.imshow('image', image)
-    cv2.waitKey()
+def getVideo():
+    capture = cv2.VideoCapture("video.mp4")
+    percent = 20
+    while (capture.isOpened()):
+        ret, frame = capture.read()
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        width = int(frame.shape[1] * percent / 100)
+        height = int(frame.shape[0] * percent / 100)
+        dim = (width, height)
+        frame_re = cv2.resize(frame, dim)
+        detectBubbles(gray)
+        cv2.imshow('frame', gray)
+        if cv2.waitKey(33)&0xFF == ord('q'):
+            break
+    capture.release()
+    cv2.destroyAllWindows()
 
-image = cv2.imread("img.png")
-detectBubbles(image)
-
-
-# def getVideo():
-#     capture = cv2.VideoCapture("video.mp4")
-#     percent = 20
-#     while (capture.isOpened()):
-#         ret, frame =capture.read()
-#         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-#         width = int(frame.shape[1] * percent / 100)
-#         height = int(frame.shape[0] * percent / 100)
-#         dim = (width, height)
-#         frame_re = cv2.resize(frame, dim)
-#         # cv2.imshow('frame', frame)
-#         cv2.imshow('Frame', gray)
-#         if cv2.waitKey(33)&0xFF == ord('q'):
-#             break
-#     capture.release()
-#     cv2.destroyAllWindows()
-
-
-
-
+getVideo()
